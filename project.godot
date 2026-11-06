@@ -1,0 +1,19 @@
+config_version=5
+
+[application]
+config/name="Buckshot VR Test Room"
+run/main_scene="res://tests/room.tscn"
+config/features=PackedStringArray("4.1", "Forward Plus")
+
+[autoload]
+Bootstrap="*res://mods-unpacked/TableVR-Bootstrap/mod_main.gd"
+
+[buckshot_vr]
+fixture=true
+
+[display]
+window/size/viewport_width=960
+window/size/viewport_height=540
+
+[xr]
+openxr/startup_alert=false

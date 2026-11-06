@@ -1,0 +1,14 @@
+{
+  "game_version": "2.2.0.6",
+  "steam_app_id": "2835570",
+  "engine_version": "4.1.1",
+  "game_files": {
+    "Buckshot Roulette.exe": "df2f8a31bd469438a1a29f831945ccea7b26963ab735f73b32936792207b1663",
+    "steam_api64.dll": "dcfaa13aa419a0641917205957dbe15aa472e7cf09a28cf8d3cf429598e67799"
+  },
+  "loader": {
+    "revision": "c8cdc7fad62a4031d24e98ecab42c0ac1348ffd9",
+    "url": "https://codeload.github.com/MSLaFaver/BRMLNeo/zip/c8cdc7fad62a4031d24e98ecab42c0ac1348ffd9",
+    "sha256": "fc5b9b7c9c15efa6dac1b6f33f7304b02db0a070fc55e10f1adaa7f77e3db7b2"
+  }
+}

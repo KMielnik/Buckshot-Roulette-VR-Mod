@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://mods-unpacked/TableVR-Bootstrap/hand.gd" id="1"]
+
+[ext_resource type="Script" path="res://mods-unpacked/TableVR-Bootstrap/glove.gd" id="2"]
+
+[sub_resource type="StandardMaterial3D" id="RightColor"]
+shading_mode = 0
+albedo_color = Color(0.48, 0.64, 0.62, 1)
+
+[sub_resource type="BoxMesh" id="Beam"]
+material = SubResource("RightColor")
+size = Vector3(0.002, 0.002, 0.19)
+
+[node name="TableVRRig" type="XROrigin3D"]
+
+[node name="Head" type="XRCamera3D" parent="."]
+near = 0.03
+
+[node name="Left" type="XRController3D" parent="."]
+tracker = &"left_hand"
+pose = &"grip"
+script = ExtResource("1")
+
+[node name="Right" type="XRController3D" parent="."]
+tracker = &"right_hand"
+pose = &"aim"
+script = ExtResource("1")
+
+[node name="Direction" type="MeshInstance3D" parent="Right"]
+top_level = true
+visible = false
+mesh = SubResource("Beam")
+
+[node name="LeftGlove" type="XRController3D" parent="."]
+tracker = &"left_hand"
+pose = &"grip"
+script = ExtResource("2")
+
+[node name="RightGlove" type="XRController3D" parent="."]
+tracker = &"right_hand"
+pose = &"grip"
+script = ExtResource("2")

@@ -1,0 +1,29 @@
+name: Bug or headset compatibility report
+description: Report a problem or describe a new headset test.
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Mod and game versions
+      placeholder: "Mod 1.0.2, Steam game 2.2.0.6"
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Headset, controllers and PC OpenXR runtime
+      placeholder: "Quest 3, Quest controllers, VirtualDesktopXR"
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Steps, expected result and actual result
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Relevant log lines
+      description: Include controller profile and script errors. Remove personal paths and unrelated information.
+      render: text

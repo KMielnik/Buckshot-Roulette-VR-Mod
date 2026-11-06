@@ -1,0 +1,24 @@
+{
+  "name": "Bootstrap",
+  "namespace": "TableVR",
+  "version_number": "1.0.2",
+  "description": "Single-player OpenXR VR for Buckshot Roulette with tracked controllers, walking, fingertip keys and a stable seated table.",
+  "website_url": "https://github.com/KMielnik/Buckshot-Roulette-VR-Mod",
+  "dependencies": [],
+  "extra": {
+    "godot": {
+      "authors": [
+        "KMielnik"
+      ],
+      "compatible_mod_loader_version": [
+        "7.0.1"
+      ],
+      "compatible_game_version": [
+        "2.2.0.6"
+      ],
+      "tags": [
+        "vr"
+      ]
+    }
+  }
+}
