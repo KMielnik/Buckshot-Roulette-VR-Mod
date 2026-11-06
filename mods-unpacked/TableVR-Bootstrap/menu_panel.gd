@@ -16,13 +16,14 @@ var dot := MeshInstance3D.new()
 var last_pixel := OUTSIDE
 var pressed := false
 var sending_pointer_input := false
+var surface: SubViewport
 
 
 func mount(ui: Node, camera: Camera3D, right: XRController3D) -> void:
 	root_view = camera.get_viewport()
 	original_mask = root_view.canvas_cull_mask
 	hand = right
-	var surface := SubViewport.new()
+	surface = SubViewport.new()
 	surface.size = PIXELS
 	surface.disable_3d = true
 	surface.transparent_bg = true
@@ -33,7 +34,7 @@ func mount(ui: Node, camera: Camera3D, right: XRController3D) -> void:
 	add_child(surface)
 	# Share the drawn canvas. Original nodes, GUI ownership and animation paths stay intact.
 	var items := ui.find_children("*", "CanvasItem", true, false)
-	items.append(ui)
+	if ui is CanvasItem: items.append(ui)
 	for item in items:
 		original_layers[item] = item.visibility_layer
 		item.visibility_layer |= PANEL_LAYER
@@ -142,6 +143,7 @@ func unmount() -> void:
 	if is_instance_valid(hand) and hand.select_changed.is_connected(_on_select):
 		hand.select_changed.disconnect(_on_select)
 	if is_instance_valid(root_view):
+		_move(OUTSIDE)
 		if pressed:
 			_on_select("cancel")
 		root_view.canvas_cull_mask = original_mask

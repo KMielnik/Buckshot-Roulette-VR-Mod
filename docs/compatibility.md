@@ -30,11 +30,13 @@ Movement uses the profile's primary stick or trackpad. Grip actions require a sq
 
 ## Scope and known limits
 
-- Single-player menu, bathroom/club traversal and table gameplay are adapted. Multiplayer has separate game logic and is unsupported.
-- Smooth movement and smooth turning are the current controls. The ending uses the game's authored camera movement with live head tracking.
+- Single-player menu, bathroom/club traversal and table gameplay are adapted. Multiplayer uses an experimental fixed virtual screen. Its local adapters are tested; online play and multiplayer headset usability remain unverified. [Multiplayer scope](multiplayer.md).
+- Smooth movement and smooth turning are the current controls. The ending retains the case pan and uses a steady VR seat in the car with live head tracking.
 - The heaven scene after a final story defeat has no VR adapter. Use the monitor to choose Retry or Exit there. The ordinary death scene redirects to the main game automatically.
 - The title options and readable gameplay text use the game's content. The added VR pause labels are English.
 - Layouts and asset references are pinned to Steam 2.2.0.6. Later updates and modified game files are rejected by the installer.
 - Other mods, other stores, localization combinations and every endless-mode edge case have not been exhaustively tested.
+
+Version 1.0.3's car stabilization, additional haptics and multiplayer screen passed automated retail checks. They have not yet received the next physical Quest pass.
 
 [Installation and troubleshooting](install.md) · [Testing details](testing.md)

@@ -34,9 +34,12 @@ python tests/retail.py $game --suite player
 python tests/retail.py $game --suite feedback
 python tests/retail.py $game --suite presentation
 python tests/retail.py $game --suite heartbeat
+python tests/retail.py $game --suite multiplayer
 ```
 
 Use `--loader-zip <archive>` with the pinned BRMLNeo download to avoid fetching it for each suite. Avoid concurrent runs of the same suite because each name owns one QA profile. Profiles use `%APPDATA%\BuckshotVR-QA-<suite>`. They can be removed after testing.
+
+`--rendered` runs the Vulkan renderer in a desktop window. The multiplayer suite can save native-content and screen-placement images with `--capture-dir <folder>`; keep that folder outside the source repository. Its preview uses an ordinary camera, not a real headset. The suite creates a local player instance without joining a lobby, so it does not prove online multiplayer compatibility.
 
 ## Headset acceptance
 
@@ -45,9 +48,10 @@ Use `--loader-zip <archive>` with the pinned BRMLNeo download to avoid fetching 
 3. Walk through both doors and enter the room. Verify the glide and seated reach. Ordinary item/shotgun camera sockets should keep the desk base steady.
 4. Poke waiver keys with a closed grip and extended index. Resting on a key must produce one letter. Test pointer fallback.
 5. Use an item, pick up the shotgun and select both targets across eligible turns. Test a blank and a live round.
-6. Check readable dialogue, Dealer grading, hover/action haptics, hit effects, blackout and revival heartbeat.
+6. Check readable dialogue, Dealer grading, hover/action haptics, hit effects, blackout and revival heartbeat. Live recoil must occur on the actual discharge; blanks, shell handling and item actions should feel distinct. Focus/tracking loss must cancel delayed pulses.
 7. Let the dealer use cuffs. Head tracking must continue through restraint and release.
-8. Open the two case latches. Confirm the pan, car scale, payout, fresh-trigger continuation and first-win unlock text.
+8. Open the two case latches. Confirm the pan, car scale, fixed car seat and payout panel, free physical leaning, fresh-trigger continuation and first-win unlock text.
 9. Open pause with left Menu, change volume, resume and return to the title. Check the runtime-specific fallback where applicable.
+10. Open Multiplayer. Verify a fixed readable screen, native UI clicks and return to the immersive title. With a second player, test host and client roles, native free look, the non-pausing match menu, disconnect and a full match. Record these separately from the single-player result.
 
 Record the headset, runtime and controller profile with results. Automated tests establish engine behavior. They do not certify comfort, stereo rendering or haptic strength on untested hardware.

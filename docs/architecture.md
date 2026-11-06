@@ -21,7 +21,8 @@ The original game retains shell order, inventory, damage, turn decisions, animat
 | table_text.gd | Localized dealer dialogue and current item description |
 | cuffs.gd | Visible wrists held against the retail rail through the cuff animation |
 | dealer_impact.gd / player_impact.gd | Stereo hit effects, blackout, revival and heartbeat observation |
-| haptics.gd | Tracked-hand pulses with priority and local strength |
+| haptics.gd / action_feedback.gd | Prioritized pulses and bounded patterns driven by native shot, shell and item events |
+| screen_mode.gd | Multiplayer compatibility screen, native canvas, mouse projection and menu/free-look actions |
 | menu_bullets.gd / retail_grade.gd | Continuous casing waterfall and stereo color grading |
 | finale.gd | Automatic case lid, authored winning camera, car scale, native payout and unlock UI |
 
@@ -37,15 +38,27 @@ Focus loss, controller loss, pause and detach clear pending presses. Menu input 
 
 The intro derives walkable floors, door placement and kick timings from the installed scene. Entry into the room produces a short glide to the authored seated height, ten centimetres behind the original home socket. At the table, ordinary camera socket changes leave the VR base steady while physical head movement continues.
 
-The cash-case pan explicitly takes camera ownership. The mod follows the full authored transform into the car. The car uses different geometry units, so the covered cut changes units per metre and the tracking/hand offsets by the measured 0.1335 ratio. The same case has consistent physical width before and after the cut.
+The cash-case pan explicitly takes camera ownership. The mod follows the authored transition, then captures the first car pose as a fixed anchor for both the rig and the score panel. The native looping shake continues only on the desktop camera. The car uses different geometry units, so the covered cut changes units per metre and the tracking/hand offsets by the measured 0.1335 ratio. The same case has consistent physical width before and after the cut.
 
 Original score labels, the continue prompt and the first-win unlock label share a filtered canvas viewport. A glyph outline keeps the score readable over the car. The unlock label renders above the black exit fade.
 
 Screen overlays and player flashes use stereo-safe presentation. Dealer shading uses a one-dimensional lookup matching the enabled retail posterization settings. Hand meshes, materials, animations and text are read from the local game.
 
+## Feedback
+
+`action_feedback.gd` observes the local muzzle animation, player shell ejection and selected native sound players. It does not guess damage from a click. The original aiming clip can finish before the gun fires, so shooter ownership uses the assigned animation. A player hit owns both motors and suppresses simultaneous self-shot recoil.
+
+Audio onsets are consumed while unfocused and must be recent. Recoil, impact, door, saw and other short patterns use real-time deadlines. Focus loss clears queued beats; missing tracking discards that hand's pending beats. Higher-priority feedback suppresses incidental ticks. The existing revival audio clock still supplies the heartbeat timing.
+
+## Multiplayer presentation
+
+`screen_mode.gd` shares the native 2D/3D worlds with a capture viewport and follows the currently selected native camera. The headset sees only the fixed screen and VR geometry on a separate render layer. The capture excludes that layer to avoid feedback. The original multiplayer mouse ray is suspended and replaced with the capture camera's projection; native hover resolution and interaction permissions remain in charge. Left Menu sends the game's own exit-menu action, without freezing network simulation.
+
+The implementation uses the pinned [Godot 4.1 SubViewport](https://docs.godotengine.org/en/4.1/classes/class_subviewport.html) and [Camera3D](https://docs.godotengine.org/en/4.1/classes/class_camera3d.html) APIs. See [multiplayer limitations and the immersive adapter plan](multiplayer.md).
+
 ## Cleanup
 
-Detach restores the desktop camera, root canvas mask, original material/render layers, mouse polling, previous world scale and simulation clock. Each adapter disconnects its observers and releases only resources it owns. This applies on scene changes and OpenXR session stop.
+Detach restores the desktop camera, root canvas mask, original material/render layers, mouse polling, previous world scale and simulation clock. It runs when the last-added rig exits, before the native UI/cameras leave the tree, and clears the captured mouse hover. Waiting for the scene root's exit is too late for this captured GUI state in the retail Vulkan build. Each adapter disconnects its observers and releases only resources it owns. This applies on scene changes and OpenXR session stop.
 
 ## Packaging
 

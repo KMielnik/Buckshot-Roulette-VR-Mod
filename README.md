@@ -2,7 +2,7 @@
 
 An unofficial OpenXR mod that brings **Buckshot Roulette** to PC VR with tracked controllers, walking, fingertip buttons and a steady seated view of the table.
 
-Walk out of the bathroom, kick the doors open and take your place opposite the Dealer. Point to use items and choose shotgun targets. Read the original dialogue in VR, feel hits and revival heartbeats, and watch your wrists get cuffed to the rail.
+Walk out of the bathroom, kick the doors open and take your place opposite the Dealer. Point to use items and choose shotgun targets. Read the original dialogue in VR, feel recoil, item actions and revival heartbeats, and watch your wrists get cuffed to the rail.
 
 **Tested with Quest 3, Quest controllers and Virtual Desktop on Windows.** Other PC OpenXR headsets use the same controller actions but need hardware testing. Requires the **Steam Windows version 2.2.0.6**. Single-player support. [Compatibility and troubleshooting](docs/compatibility.md).
 
@@ -27,7 +27,13 @@ Setup uses the PowerShell included with Windows and needs internet access. Allow
 | Continue after winning | Pull the **right trigger** when the score prompt appears. |
 | Pause | **Left Menu / Options** button. With an Index controller profile, **left-stick click** also works. Point and click to resume, change session volume, return to the title or quit. |
 
-The original game decides when actions are allowed. Cuffs temporarily hold the visible hands at the table. The ending follows the game's animated camera while head tracking stays active.
+The original game decides when actions are allowed. Cuffs temporarily hold the visible hands at the table. The ending follows the case pan, then holds a steady seat and score panel in the car. Head tracking stays active throughout.
+
+## Multiplayer
+
+Version 1.0.3 adds **experimental virtual-screen mode** for multiplayer. The original lobby and match appear on a fixed screen inside the headset. Aim and click with the right trigger. In a match, left Menu opens the native player/disconnect menu; hold right grip and move the pointer for the game's free look. Multiplayer is not paused by that menu.
+
+This is a flat-screen compatibility mode, not immersive multiplayer VR. Local scene, UI, camera and input tests pass; **an online match with a second player has not been verified**. Steam invitations and clipboard lobby codes may still need desktop interaction. See the [multiplayer audit and implementation plan](docs/multiplayer.md).
 
 ## Settings and support
 

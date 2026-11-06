@@ -7,6 +7,7 @@ const ViewStation := preload("res://mods-unpacked/TableVR-Bootstrap/view_station
 const DealerImpact := preload("res://mods-unpacked/TableVR-Bootstrap/dealer_impact.gd")
 const PlayerImpact := preload("res://mods-unpacked/TableVR-Bootstrap/player_impact.gd")
 const Haptics := preload("res://mods-unpacked/TableVR-Bootstrap/haptics.gd")
+const ActionFeedback := preload("res://mods-unpacked/TableVR-Bootstrap/action_feedback.gd")
 const Cuffs := preload("res://mods-unpacked/TableVR-Bootstrap/cuffs.gd")
 const TableText := preload("res://mods-unpacked/TableVR-Bootstrap/table_text.gd")
 const MenuBullets := preload("res://mods-unpacked/TableVR-Bootstrap/menu_bullets.gd")
@@ -14,9 +15,11 @@ const RetailGrade := preload("res://mods-unpacked/TableVR-Bootstrap/retail_grade
 const Finale := preload("res://mods-unpacked/TableVR-Bootstrap/finale.gd")
 const PauseMenu := preload("res://mods-unpacked/TableVR-Bootstrap/pause_menu.gd")
 const NearInput := preload("res://mods-unpacked/TableVR-Bootstrap/near_input.gd")
+const ScreenMode := preload("res://mods-unpacked/TableVR-Bootstrap/screen_mode.gd")
 const MENU := "res://scenes/menu.tscn"
 const MAIN := "res://scenes/main.tscn"
 const TEST_ROOM := "res://tests/room.tscn"
+const MP_SCENES := ["res://multiplayer/scenes/mp_lobby.tscn", "res://multiplayer/scenes/mp_main.tscn", "res://multiplayer/scenes/buffer_scene.tscn"]
 const TURN_DEGREES_PER_SECOND := 40.0
 const DEFAULT_WORLD_SIZE := 0.88
 
@@ -30,6 +33,7 @@ var world_pointer: WorldPointer
 var dealer_impact: DealerImpact
 var player_impact: PlayerImpact
 var haptics: Haptics
+var action_feedback: ActionFeedback
 var cuffs: Cuffs
 var table_text: TableText
 var menu_bullets: MenuBullets
@@ -87,14 +91,14 @@ func _process(delta: float) -> void:
 	if scene != inspected_scene:
 		_detach()
 		inspected_scene = scene
-		if scene.scene_file_path == target_scene or (target_scene == MENU and scene.scene_file_path == MAIN):
-			var camera := scene.get_node_or_null("Camera") as Camera3D
+		if scene.scene_file_path == target_scene or (target_scene == MENU and (scene.scene_file_path == MAIN or scene.scene_file_path in MP_SCENES)):
+			var camera := scene.get_viewport().get_camera_3d() if scene.scene_file_path in MP_SCENES else scene.get_node_or_null("Camera") as Camera3D
 			if camera != null and camera.is_current() and not camera.get_viewport().use_xr:
 				_attach(scene, camera)
 			else:
 				print("[TableVR] expected desktop camera unavailable or viewport already owned")
 	if is_instance_valid(rig):
-		var station_frame := base_camera.global_transform
+		var station_frame: Transform3D = menu_panel.station if menu_panel is ScreenMode else base_camera.global_transform
 		var head: XRCamera3D = rig.get_node("Head")
 		var ready := focused and not needs_anchor
 		if is_instance_valid(pause_menu):
@@ -144,6 +148,7 @@ func _process(delta: float) -> void:
 		if is_instance_valid(finale):
 			finale.present(playing, rig.get_node("RightGlove"))
 		haptics.set_active(playing)
+		if is_instance_valid(action_feedback): action_feedback.update(playing and not ending)
 		var bound := cuffs.update(playing and not ending) if is_instance_valid(cuffs) else false
 		var wrists_at_rail := bound and is_instance_valid(cuffs.second) and cuffs.second.visible
 		if wrists_at_rail and not wrists_were_at_rail:
@@ -154,6 +159,7 @@ func _process(delta: float) -> void:
 		rig.get_node("LeftGlove").sample(playing or (paused and ready))
 		rig.get_node("RightGlove").sample(playing or (paused and ready))
 		if is_instance_valid(menu_panel):
+			if menu_panel is ScreenMode: menu_panel.update_screen(playing)
 			menu_panel.update_pointer(playing)
 		if is_instance_valid(world_pointer):
 			world_pointer.set_active(playing and not ending and not bound and view_station.sequence < 0)
@@ -198,6 +204,13 @@ func _attach(scene: Node, camera: Camera3D) -> void:
 		if grade.mount(camera):
 			print("[TableVR] retail posterization enabled")
 	if in_game:
+		action_feedback = ActionFeedback.new()
+		rig.add_child(action_feedback)
+		if action_feedback.mount(scene):
+			action_feedback.feedback.connect(haptics.cue)
+		else:
+			action_feedback.queue_free()
+			action_feedback = null
 		finale = Finale.new()
 		rig.add_child(finale)
 		if not finale.mount(camera, interaction):
@@ -247,6 +260,11 @@ func _attach(scene: Node, camera: Camera3D) -> void:
 			player_impact.player_hit.connect(haptics.cue.bind(&"hit"))
 			player_impact.revived.connect(haptics.cue.bind(&"revival"))
 			player_impact.heartbeat.connect(haptics.heartbeat)
+	elif scene.scene_file_path in MP_SCENES:
+		menu_panel = ScreenMode.new()
+		rig.add_child(menu_panel)
+		menu_panel.mount_screen(scene, camera, rig.get_node("Right"))
+		menu_panel.feedback.connect(haptics.cue)
 	elif ui != null and ui.has_node("menu ui"):
 		var menu := scene.get_node_or_null("standalone managers/menu manager")
 		if menu != null and menu.get("viewing_intro") == true and menu.has_method("SkipIntro"):
@@ -263,6 +281,9 @@ func _attach(scene: Node, camera: Camera3D) -> void:
 				menu_bullets = null
 				print("[TableVR] menu casing layout unavailable")
 	needs_anchor = true
+	# The rig is the last scene child and leaves before native UI/cameras.
+	# Release captured GUI state while those original nodes are still in-tree.
+	rig.tree_exiting.connect(_detach)
 	scene.tree_exiting.connect(_detach)
 	print("[TableVR] rig attached ", scene.scene_file_path)
 
@@ -319,6 +340,8 @@ func _set_focus(value: bool) -> void:
 			table_text.set_active(false)
 		if is_instance_valid(player_impact):
 			player_impact.set_active(false)
+		if is_instance_valid(action_feedback): action_feedback.update(false)
+		if is_instance_valid(menu_panel) and menu_panel is ScreenMode: menu_panel.update_screen(false)
 		rig.get_node("Left").sample(false)
 		rig.get_node("Right").sample(false)
 		rig.get_node("LeftGlove").sample(false)
@@ -352,6 +375,8 @@ func _detach() -> void:
 	if is_instance_valid(finale): finale.unmount()
 	finale = null
 	ending_calibrated = false
+	if is_instance_valid(action_feedback): action_feedback.unmount()
+	action_feedback = null
 	if is_instance_valid(haptics):
 		haptics.set_active(false)
 		haptics = null
@@ -366,6 +391,7 @@ func _detach() -> void:
 		menu_bullets.unmount()
 		menu_bullets = null
 	if is_instance_valid(menu_panel):
+		if menu_panel is ScreenMode: base_camera = menu_panel.desktop
 		menu_panel.unmount()
 		menu_panel = null
 	if is_instance_valid(world_pointer):
@@ -389,6 +415,7 @@ func _detach() -> void:
 	if is_instance_valid(base_camera) and base_camera.is_inside_tree():
 		base_camera.make_current()
 	if is_instance_valid(rig):
+		if rig.tree_exiting.is_connected(_detach): rig.tree_exiting.disconnect(_detach)
 		var scene := rig.get_parent()
 		if is_instance_valid(scene) and scene.tree_exiting.is_connected(_detach):
 			scene.tree_exiting.disconnect(_detach)

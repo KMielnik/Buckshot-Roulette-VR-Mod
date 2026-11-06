@@ -45,6 +45,10 @@ func _run() -> void:
 	var seen_black := false
 	var pan_matched := false
 	var car_matched := false
+	var car_station := Transform3D.IDENTITY
+	var score_station := Transform3D.IDENTITY
+	var steady := true
+	var native_moved := false
 	for tick in 3600:
 		await get_tree().process_frame
 		mod._process(1./90.)
@@ -53,9 +57,21 @@ func _run() -> void:
 		if mod.player_impact.visible and mod.player_impact.cover.get_shader_parameter("tint").a >= .99:
 			seen_black = true
 		if ending.animator_cam.current_animation == "camera loop car" and finale.panel.visible:
-			car_matched = mod.rig.global_position.distance_to(mod.base_camera.global_position) < .02
+			if not car_matched:
+				car_matched = mod.rig.global_position.distance_to(mod.base_camera.global_position) < .02
+				car_station = mod.rig.global_transform
+				score_station = finale.panel.global_transform
+			else:
+				steady = steady and mod.rig.global_transform.is_equal_approx(car_station) and finale.panel.global_transform.is_equal_approx(score_station)
+				native_moved = native_moved or not mod.base_camera.global_transform.is_equal_approx(car_station)
 		if ending.waitingForInput: break
 	check(pan_matched and car_matched, "VR base follows the authored case pan and moves to the car")
+	check(steady and native_moved, "car seat and score stay fixed while the desktop camera shakes")
+	var eye: XRCamera3D = mod.rig.get_node("Head")
+	var old_eye := eye.transform
+	eye.position += Vector3(.03, .01, -.02)
+	check(not eye.global_transform.is_equal_approx(car_station) and mod.rig.global_transform.is_equal_approx(car_station), "head can lean independently of the fixed car seat")
+	eye.transform = old_eye
 	var table_hinge = brief.anim_lid.get_parent()
 	var car_hinge = scene.get_node("player vehicle parent/vehicle/briefcase parent in vehicle/briefcase hinge")
 	var table_span: float = table_hinge.get_node("briefcase latch_left").global_position.distance_to(table_hinge.get_node("briefcase latch_right").global_position)

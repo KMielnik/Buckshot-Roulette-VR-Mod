@@ -48,6 +48,12 @@ haptic_strength=1.0
 
 Session volume in the VR pause menu affects the current run. Other game settings are available from the original title menu. Smooth walking and turning are the release defaults.
 
+## Multiplayer screen mode
+
+Multiplayer opens on a fixed virtual screen in the headset. Point with the right hand and use the right trigger to click. In a match, left Menu opens the original player/disconnect menu without pausing the match. Hold right grip while moving the pointer for native free look. Index profiles use the same left-stick-click menu fallback as single player.
+
+This mode is experimental and is not immersive multiplayer VR. The local UI and camera paths have automated checks, but an online match with another player has not been tested. Steam invites and clipboard lobby codes may require the desktop.
+
 ## Manual setup options
 
 From PowerShell in the extracted release directory, specify the game's folder and an empty installation directory when automatic detection is unsuitable.

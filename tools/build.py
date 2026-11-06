@@ -14,8 +14,8 @@ RUNTIME_FILES = (
     "manifest.json", "mod_main.gd", "rig.tscn", "hand.gd", "glove.gd",
     "retail_hand.gd", "view_station.gd", "walk_area.gd", "menu_panel.gd",
     "world_pointer.gd", "near_input.gd", "dealer_impact.gd", "player_impact.gd",
-    "haptics.gd", "cuffs.gd", "table_text.gd", "menu_bullets.gd",
-    "retail_grade.gd", "finale.gd", "pause_menu.gd",
+    "haptics.gd", "action_feedback.gd", "cuffs.gd", "table_text.gd", "menu_bullets.gd",
+    "retail_grade.gd", "finale.gd", "pause_menu.gd", "screen_mode.gd",
 )
 RELEASE_FILES = {
     "Install.cmd": "installer/Install.cmd",

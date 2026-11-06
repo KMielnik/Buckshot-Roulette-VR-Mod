@@ -16,6 +16,8 @@ var old_layers := {}
 var entry := Transform3D.IDENTITY
 var blend := 0.0
 var continue_armed := false
+var car_frame := Transform3D.IDENTITY
+var car_anchored := false
 
 func mount(camera: Camera3D, interaction: Node) -> bool:
 	desk_camera = camera
@@ -51,6 +53,13 @@ func _started(clip: StringName) -> void:
 func camera_frame(delta: float) -> Transform3D:
 	blend = minf(1.0, blend + delta / .35)
 	var frame := desk_camera.global_transform.orthonormalized()
+	if in_car():
+		# Keep the authored car placement, but never inherit its looping shake.
+		# This runs after the native animation has evaluated its first frame.
+		if not car_anchored:
+			car_frame = frame
+			car_anchored = true
+		frame = car_frame
 	return entry.interpolate_with(frame, smoothstep(0.0, 1.0, blend)) if blend < 1.0 else frame
 
 func in_car() -> bool:
@@ -67,7 +76,7 @@ func present(allowed: bool, hand: XRController3D) -> void:
 		if surface.canvas_cull_mask != layer:
 			surface.canvas_cull_mask = layer
 			panel.mesh.material.render_priority = Material.RENDER_PRIORITY_MAX if unlocking else 4
-		var frame := desk_camera.global_transform.orthonormalized()
+		var frame := car_frame if car_anchored else desk_camera.global_transform.orthonormalized()
 		var units := XRServer.world_scale
 		panel.global_transform = Transform3D(frame.basis.scaled(Vector3.ONE * units),
 			frame * (Vector3(0, 0, -1.45) * units))
